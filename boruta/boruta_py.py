@@ -282,7 +282,7 @@ class BorutaPy(BaseEstimator, TransformerMixin):
 
             # make sure we start with a new tree in each iteration
             if self.random_state_as_int:
-                self.random_state = (self.random_state + 7777) % 2**32
+                self.random_state_as_int = (self.random_state_as_int + 7777) % 2**32
                 self.estimator.set_params(random_state=self.random_state_as_int)
             else:
                 self.estimator.set_params(random_state=self.random_state)
