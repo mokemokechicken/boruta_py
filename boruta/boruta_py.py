@@ -175,7 +175,8 @@ class BorutaPy(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, estimator, n_estimators=1000, perc=100, alpha=0.05,
-                 two_step=True, max_iter=100, random_state=None, verbose=0):
+                 two_step=True, max_iter=100, random_state=None, verbose=0,
+                 random_state_as_int=None):
         self.estimator = estimator
         self.n_estimators = n_estimators
         self.perc = perc
@@ -184,6 +185,7 @@ class BorutaPy(BaseEstimator, TransformerMixin):
         self.max_iter = max_iter
         self.random_state = random_state
         self.verbose = verbose
+        self.random_state_as_int = random_state_as_int
 
     def fit(self, X, y):
         """
@@ -279,7 +281,11 @@ class BorutaPy(BaseEstimator, TransformerMixin):
                 self.estimator.set_params(n_estimators=n_tree)
 
             # make sure we start with a new tree in each iteration
-            self.estimator.set_params(random_state=self.random_state)
+            if self.random_state_as_int:
+                self.random_state_as_int = (self.random_state_as_int + 7777) % 2**32
+                self.estimator.set_params(random_state=self.random_state_as_int)
+            else:
+                self.estimator.set_params(random_state=self.random_state)
 
             # add shadow attributes, shuffle them and train estimator, get imps
             cur_imp = self._add_shadows_get_imps(X, y, dec_reg)
