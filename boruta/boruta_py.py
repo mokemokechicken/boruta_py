@@ -9,10 +9,16 @@ License: BSD 3 clause
 """
 
 from __future__ import print_function, division
+
+from logging import getLogger
+
 import numpy as np
 import scipy as sp
 from sklearn.utils import check_random_state, check_X_y
 from sklearn.base import TransformerMixin, BaseEstimator
+
+
+logger = getLogger(__name__)
 
 
 class BorutaPy(BaseEstimator, TransformerMixin):
@@ -530,23 +536,24 @@ class BorutaPy(BaseEstimator, TransformerMixin):
         n_iter = str(_iter) + ' / ' + str(self.max_iter)
         n_confirmed = np.where(dec_reg == 1)[0].shape[0]
         n_rejected = np.where(dec_reg == -1)[0].shape[0]
-        cols = ['Iteration: ', 'Confirmed: ', 'Tentative: ', 'Rejected: ']
+        cols = ['Iteration', 'Confirmed', 'Tentative', 'Rejected']
 
         # still in feature selection
         if flag == 0:
             n_tentative = np.where(dec_reg == 0)[0].shape[0]
             content = map(str, [n_iter, n_confirmed, n_tentative, n_rejected])
+            output = None
             if self.verbose == 1:
                 output = cols[0] + n_iter
             elif self.verbose > 1:
-                output = '\n'.join([x[0] + '\t' + x[1] for x in zip(cols, content)])
+                output = ', '.join([x[0] + '=' + x[1] for x in zip(cols, content)])
+            if output:
+                logger.info(output)
 
         # Boruta finished running and tentatives have been filtered
         else:
             n_tentative = np.sum(self.support_weak_)
             content = map(str, [n_iter, n_confirmed, n_tentative, n_rejected])
-            result = '\n'.join([x[0] + '\t' + x[1] for x in zip(cols, content)])
-            output = "\n\nBorutaPy finished running.\n\n" + result
-        print(output)
-        print()
-
+            output = ', '.join([x[0] + '=' + x[1] for x in zip(cols, content)])
+            logger.info('BorutaPy finished running.')
+            logger.info(output)
